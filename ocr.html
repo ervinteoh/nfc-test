@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Reader</title>
+</head>
+<body>
+    <h1>OCR Reader</h1>
+    <input type="file" id="image-input" accept="image/*">
+    <button id="process-image">Process Image</button>
+    <p id="ocr-output"></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+    <script>
+        document.getElementById('process-image').addEventListener('click', () => {
+            const input = document.getElementById('image-input');
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const image = new Image();
+                    image.src = e.target.result;
+                    image.onload = function() {
+                        Tesseract.recognize(
+                            image,
+                            'eng',
+                            {
+                                logger: m => console.log(m)
+                            }
+                        ).then(({ data: { text } }) => {
+                            document.getElementById('ocr-output').innerText = text;
+                        }).catch(err => {
+                            console.error(err);
+                            document.getElementById('ocr-output').innerText = 'Error processing image.';
+                        });
+                    };
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select an image file.');
+            }
+        });
+    </script>
+</body>
+</html>
